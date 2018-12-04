@@ -92,6 +92,14 @@ def discover_delete_images(regionname):
                                     if container['image'] not in running_containers:
                                         running_containers.append(container['image'])
 
+    batch_client = boto3.client('batch', region_name=regionname)
+    batch_job_defintions = batch_client.describe_job_definitions(status='ACTIVE')
+    for batch_job_definition in batch_job_defintions['jobDefinitions']:
+        image = batch_job_definition['containerProperties']['image']
+        if '.dkr.ecr.' in image and ":" in image:
+            if image not in running_containers:
+                running_containers.append(image)                                        
+
     print("Images that are running:")
     for image in running_containers:
         print(image)
